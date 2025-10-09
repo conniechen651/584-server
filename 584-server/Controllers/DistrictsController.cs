@@ -1,12 +1,101 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using SchoolModel;
 
-namespace _584_server;
-
-public class DistrictsController : Controller
+namespace _584_server.Controllers
 {
-    // GET
-    public IActionResult Index()
+    [Route("api/[controller]")]
+    [ApiController]
+    public class DistrictsController(SchoolDbContext context) : ControllerBase
     {
-        return View();
+
+        // GET: api/Districts
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<District>>> GetDistricts()
+        {
+            return await context.Districts.ToListAsync();
+        }
+
+        // GET: api/Districts/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<District>> GetDistrict(int id)
+        {
+            var district = await context.Districts.FindAsync(id);
+
+            if (district == null)
+            {
+                return NotFound();
+            }
+
+            return district;
+        }
+
+        // PUT: api/Districts/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutDistrict(int id, District district)
+        {
+            if (id != district.Id)
+            {
+                return BadRequest();
+            }
+
+            context.Entry(district).State = EntityState.Modified;
+
+            try
+            {
+                await context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!DistrictExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        // POST: api/Districts
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost]
+        public async Task<ActionResult<District>> PostDistrict(District district)
+        {
+            context.Districts.Add(district);
+            await context.SaveChangesAsync();
+
+            return CreatedAtAction("GetDistrict", new { id = district.Id }, district);
+        }
+
+        // DELETE: api/Countries/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteDistrict(int id)
+        {
+            var district = await context.Districts.FindAsync(id);
+            if (district == null)
+            {
+                return NotFound();
+            }
+
+            context.Districts.Remove(district);
+            await context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private bool DistrictExists(int id)
+        {
+            return context.Districts.Any(e => e.Id == id);
+        }
     }
 }
