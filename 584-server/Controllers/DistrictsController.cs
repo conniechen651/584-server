@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using _584_server.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SchoolModel;
@@ -20,6 +21,47 @@ namespace _584_server.Controllers
         {
             return await context.Districts.ToListAsync();
         }
+        
+        [HttpGet("score")]
+        public async Task<ActionResult<IEnumerable<DistrictScore>>> GetDistrictScore()
+        {
+            return await context.Districts
+                .Select(d => new DistrictScore()
+                {
+                    Id = d.Id,
+                    Name = d.Name,
+                    County = d.County,
+                    MathScore = d.Schools.Any() ? d.Schools.Average(s => s.MathScore) : 0,
+                    ReadingScore = d.Schools.Any() ? d.Schools.Average(s => s.ReadingScore) : 0,
+                    WritingScore = d.Schools.Any() ? d.Schools.Average(s => s.WritingScore) : 0
+                })
+                .ToListAsync();
+        }
+
+        [HttpGet("score/{id}")]
+        public ActionResult<DistrictScore> GetDistrictScoreById(int id)
+        {
+            var dto = context.Districts
+                .Where(d => d.Id == id)
+                .Select(d => new DistrictScore
+                {
+                    Id = d.Id,
+                    Name = d.Name,
+                    County = d.County,
+                    MathScore = d.Schools.Any() ? d.Schools.Average(s => s.MathScore) : 0,
+                    ReadingScore = d.Schools.Any() ? d.Schools.Average(s => s.ReadingScore) : 0,
+                    WritingScore = d.Schools.Any() ? d.Schools.Average(s => s.WritingScore) : 0
+                })
+                .SingleOrDefault();
+
+            if (dto == null)
+            {
+                return NotFound();
+            }
+
+            return dto;
+        }
+        
 
         // GET: api/Districts/5
         [HttpGet("{id}")]
