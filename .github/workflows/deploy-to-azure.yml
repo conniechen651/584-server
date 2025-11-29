@@ -28,7 +28,7 @@ jobs:
     - name: Publish
       run: dotnet publish 584-server/584-server.csproj --configuration Release --output ./publish --no-build
 
-      - name: Set App Setting: ConnectionStrings__DefaultConnection
+    - name: Set App Setting: ConnectionStrings__DefaultConnection
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
