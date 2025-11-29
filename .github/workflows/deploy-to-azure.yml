@@ -28,7 +28,7 @@ jobs:
     - name: Publish
       run: dotnet publish 584-server/584-server.csproj --configuration Release --output ./publish --no-build
 
-    - name: Azure Login
+      - name: Set App Setting: ConnectionStrings__DefaultConnection
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
@@ -37,11 +37,11 @@ jobs:
       uses: azure/cli@v1
       with:
         azcliversion: '2.60.0'
-        inlineScript: |
-          az webapp config appsettings set \
-            --resource-group "rg-comp584" \
-            --name "Comp584Server" \
-            --settings ConnectionStrings__DefaultConnection="${{ secrets.PROD_DB_CONNECTIONSTRING }}"
+        package: './publish'
+        az webapp config appsettings set \
+          --resource-group "rg-comp584" \
+          --name "Comp584Server" \
+          --settings ConnectionStrings__DefaultConnection="${{ secrets.PROD_DB_CONNECTIONSTRING }}"
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
