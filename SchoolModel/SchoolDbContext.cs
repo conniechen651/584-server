@@ -33,6 +33,7 @@ public partial class SchoolDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<School>(entity =>
         {
             entity.HasOne(d => d.District).WithMany(p => p.Schools)

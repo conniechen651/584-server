@@ -1,0 +1,100 @@
+name: CI/CD - Deploy to Azure App Service
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    env:
+      DOTNET_USE_POLLING_FILE_WATCHER: "1"
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '9.0.x'
+
+    - name: Restore
+      run: dotnet restore 584-server/584-server.csproj
+
+    - name: Build
+      run: dotnet build --configuration Release 584-server/584-server.csproj --no-restore
+
+    - name: Publish
+      run: dotnet publish 584-server/584-server.csproj --configuration Release --output ./publish --no-build
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Set App Setting: ConnectionStrings__DefaultConnection
+      uses: azure/cli@v1
+      with:
+        azcliversion: '2.60.0'
+        inlineScript: |
+          az webapp config appsettings set \
+            --resource-group "rg-comp584" \
+            --name "Comp584Server" \
+            --settings ConnectionStrings__DefaultConnection="${{ secrets.PROD_DB_CONNECTIONSTRING }}"
+
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'Comp584Server'
+        package: './publish'
+name: CI/CD - Deploy to Azure App Service
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    env:
+      DOTNET_USE_POLLING_FILE_WATCHER: "1"
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '9.0.x' # match your SDK
+
+    - name: Restore dependencies
+      run: dotnet restore 584-server/584-server.csproj
+
+    - name: Build
+      run: dotnet build --configuration Release 584-server/584-server.csproj --no-restore
+
+    - name: Publish
+      run: dotnet publish 584-server/584-server.csproj --configuration Release --output ./publish --no-build
+
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Set App Setting: ConnectionStrings__DefaultConnection
+      uses: azure/cli@v1
+      with:
+        azcliversion: '2.60.0'
+        inlineScript: |
+          az webapp config appsettings set \
+            --resource-group "<RESOURCE_GROUP>" \
+            --name "<APP_NAME>" \
+            --settings ConnectionStrings__DefaultConnection="${{ secrets.PROD_DB_CONNECTIONSTRING }}"
+
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: '<APP_NAME>'
+        package: './publish'

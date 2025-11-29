@@ -9,15 +9,18 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
 builder.Services.AddDbContext<SchoolDbContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")); //?? throw new InvalidOperationException("Connection string 'Comp584Database' not found."));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")); 
 });
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API Name", Version = "v1" });
 
 });
+
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
