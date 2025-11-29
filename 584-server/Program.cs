@@ -47,4 +47,33 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.MapGet("/api/test", () => Results.Ok(new { 
+    status = "API is working",
+    timestamp = DateTime.UtcNow 
+}));
+
+app.MapGet("/api/test-db", async (SchoolDbContext db) =>
+{
+    try
+    {
+        var canConnect = await db.Database.CanConnectAsync();
+        if (canConnect)
+        {
+            var districtCount = await db.Districts.CountAsync();
+            return Results.Ok(new { 
+                status = "Database connected",
+                districtCount = districtCount 
+            });
+        }
+        return Results.Problem("Cannot connect to database");
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(
+            detail: $"Error: {ex.Message}\nInner: {ex.InnerException?.Message}",
+            title: "Database Error"
+        );
+    }
+});
+
 app.Run();
