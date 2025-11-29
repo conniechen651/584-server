@@ -51,20 +51,16 @@ app.MapGet("/api/test-db", async (SchoolDbContext db, IConfiguration config) =>
 {
     try
     {
-        // Get connection string (masked for security)
-        var connString = config.GetConnectionString("DefaultConnection");
-        var maskedConnString = connString?.Substring(0, Math.Min(50, connString.Length)) + "...";
+        // Force an actual connection attempt
+        await db.Database.OpenConnectionAsync();
+        await db.Database.CloseConnectionAsync();
         
-        var canConnect = await db.Database.CanConnectAsync();
-        if (canConnect)
-        {
-            var districtCount = await db.Districts.CountAsync();
-            return Results.Ok(new { 
-                status = "Database connected",
-                districtCount = districtCount 
-            });
-        }
-        return Results.Problem("Cannot connect to database");
+        // If we get here, connection worked
+        var districtCount = await db.Districts.CountAsync();
+        return Results.Ok(new { 
+            status = "Database connected successfully",
+            districtCount = districtCount 
+        });
     }
     catch (Exception ex)
     {
