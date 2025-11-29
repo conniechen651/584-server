@@ -47,15 +47,14 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapGet("/api/test", () => Results.Ok(new { 
-    status = "API is working",
-    timestamp = DateTime.UtcNow 
-}));
-
-app.MapGet("/api/test-db", async (SchoolDbContext db) =>
+app.MapGet("/api/test-db", async (SchoolDbContext db, IConfiguration config) =>
 {
     try
     {
+        // Get connection string (masked for security)
+        var connString = config.GetConnectionString("DefaultConnection");
+        var maskedConnString = connString?.Substring(0, Math.Min(50, connString.Length)) + "...";
+        
         var canConnect = await db.Database.CanConnectAsync();
         if (canConnect)
         {
@@ -69,10 +68,16 @@ app.MapGet("/api/test-db", async (SchoolDbContext db) =>
     }
     catch (Exception ex)
     {
-        return Results.Problem(
-            detail: $"Error: {ex.Message}\nInner: {ex.InnerException?.Message}",
-            title: "Database Error"
-        );
+        var innerMsg = ex.InnerException?.Message ?? "No inner exception";
+        var innerInnerMsg = ex.InnerException?.InnerException?.Message ?? "No deeper exception";
+        
+        return Results.Json(new { 
+            error = ex.Message,
+            innerError = innerMsg,
+            deeperError = innerInnerMsg,
+            exceptionType = ex.GetType().Name,
+            stackTrace = ex.StackTrace?.Split('\n').Take(5)
+        }, statusCode: 500);
     }
 });
 
