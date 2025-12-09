@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using _584_server.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +26,7 @@ namespace _584_server.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<School>>> GetSchools()
         {
-            return await _context.Schools.Take(100).ToListAsync();
+            return await _context.Schools.ToListAsync();
         }
 
         // GET: api/Schools/5
@@ -74,9 +76,26 @@ namespace _584_server.Controllers
 
         // POST: api/Schools
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [Authorize]
         [HttpPost]
-        public async Task<ActionResult<School>> PostSchool(School school)
+        public async Task<ActionResult<School>> PostSchool(SchoolScore request)
         {
+            var districtExists = await _context.Districts.AnyAsync(d => d.Id == request.DistrictId);
+            if (!districtExists)
+            {
+                return BadRequest("Invalid district ID");
+            }
+
+            var school = new School
+            {
+                DistrictId = request.DistrictId,
+                Name = request.Name,
+                MathScore = request.MathScore,
+                ReadingScore = request.ReadingScore,
+                WritingScore = request.WritingScore,
+                NumTestTakers = request.NumTestTakers
+            };
+
             _context.Schools.Add(school);
             await _context.SaveChangesAsync();
 
