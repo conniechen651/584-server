@@ -102,4 +102,34 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.MapGet("/api/test-db", async (SchoolDbContext db, IConfiguration config) =>
+{
+    try
+    {
+        // Force an actual connection attempt
+        await db.Database.OpenConnectionAsync();
+        await db.Database.CloseConnectionAsync();
+        
+        // If we get here, connection worked
+        var districtCount = await db.Districts.CountAsync();
+        return Results.Ok(new { 
+            status = "Database connected successfully",
+            districtCount = districtCount 
+        });
+    }
+    catch (Exception ex)
+    {
+        var innerMsg = ex.InnerException?.Message ?? "No inner exception";
+        var innerInnerMsg = ex.InnerException?.InnerException?.Message ?? "No deeper exception";
+        
+        return Results.Json(new { 
+            error = ex.Message,
+            innerError = innerMsg,
+            deeperError = innerInnerMsg,
+            exceptionType = ex.GetType().Name,
+            stackTrace = ex.StackTrace?.Split('\n').Take(5)
+        }, statusCode: 500);
+    }
+});
+
 app.Run();
