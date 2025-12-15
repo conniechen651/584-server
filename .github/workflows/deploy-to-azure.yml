@@ -41,6 +41,19 @@ jobs:
               --name "Comp584Server" \
               --connection-string-type Custom \
               --settings DefaultConnection="${{ secrets.PROD_DB_CONNECTIONSTRING }}"
+              
+      - name: Set JwtSettings in Azure
+        uses: azure/cli@v2
+        env:
+          AZURE_CONFIG_DIR: /tmp/azcli
+        with:
+          inlineScript: |
+            az webapp config appsettings set \
+              --resource-group "rg-comp584" \
+              --name "Comp584Server" \
+              --settings JwtSettings__Issuer="${{ secrets.JWT_ISSUER }}" \
+                         JwtSettings__Audience="${{ secrets.JWT_AUDIENCE }}" \
+                         JwtSettings__Secretkey="${{ secrets.JWT_SECRETKEY }}"
       
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
