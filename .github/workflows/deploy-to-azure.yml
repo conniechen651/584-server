@@ -44,8 +44,6 @@ jobs:
               
       - name: Set JwtSettings in Azure
         uses: azure/cli@v2
-        env:
-          AZURE_CONFIG_DIR: /tmp/azcli
         with:
           inlineScript: |
             az webapp config appsettings set \
