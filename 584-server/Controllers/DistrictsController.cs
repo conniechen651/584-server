@@ -17,6 +17,7 @@ namespace _584_server.Controllers
     {
 
         // GET: api/Districts
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<District>>> GetDistricts()
         {

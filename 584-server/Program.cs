@@ -50,18 +50,11 @@ builder.Services.AddAuthentication(c =>
     {
         c.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
         c.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-    .AddJwtBearer(options =>
-    {
-        options.Authority = "https://dev-yl7blimqv18gp6tv.us.auth0.com";
-        options.Audience = "https://comp584server-h6g8b9bqdwfye8ab.canadacentral-01.azurewebsites.net/api";
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true
-        };
-    });
+    }).AddJwtBearer(options =>
+{
+    options.Authority = "https://dev-yl7blimqv18gp6tv.us.auth0.com/";
+    options.Audience = "https://comp584server-h6g8b9bqdwfye8ab.canadacentral-01.azurewebsites.net";
+});
 
 builder.Services.AddAuthorization(options =>
 {
@@ -85,16 +78,23 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.UseSwagger();
+    app.UseDeveloperExceptionPage();
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Your API Name v1");
         
     });
 }
+else
+{
+    app.UseExceptionHandler("/Home/Error");
+}
 
 app.UseCors(options => options.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles();
 
 app.UseAuthentication();
 
