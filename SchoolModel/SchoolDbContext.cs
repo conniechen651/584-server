@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
 namespace SchoolModel;
 
-public partial class SchoolDbContext : DbContext
+public partial class SchoolDbContext : IdentityDbContext<SchoolModelUser>
+
 {
     public SchoolDbContext()
     {

@@ -12,7 +12,8 @@ namespace _584_server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SeedController(SchoolDbContext context, IHostEnvironment environment) : ControllerBase
+    public class SeedController(SchoolDbContext context, IHostEnvironment environment, RoleManager<IdentityRole> roleManager, 
+        UserManager<SchoolModelUser> userManager, IConfiguration configuration) : ControllerBase
     {
         string _pathName = Path.Combine(environment.ContentRootPath, "Data/schoolSAT.csv");
         [HttpPost("Districts")]
@@ -83,6 +84,47 @@ namespace _584_server.Controllers
             await context.SaveChangesAsync();
 
             return new JsonResult(schoolCount);
+        }
+        
+        [HttpPost("Users")]
+        public async Task<ActionResult> PostUsers()
+        {
+            string administrator = "administrator";
+            string registeredUser = "registeredUser";
+            if (!await roleManager.RoleExistsAsync(administrator))
+            {
+                await roleManager.CreateAsync(new IdentityRole(administrator));
+            }
+
+            if (!await roleManager.RoleExistsAsync(registeredUser))
+            {
+                await roleManager.CreateAsync(new IdentityRole(registeredUser));
+            }
+            SchoolModelUser adminUser = new()
+            {
+                UserName = "admin",
+                Email = "admin@email.com",
+                EmailConfirmed = true,
+                LockoutEnabled = false,
+                SecurityStamp = Guid.NewGuid().ToString()
+            };
+
+            await userManager.CreateAsync(adminUser, configuration["DefaultPasswords:admin"]!);
+            await userManager.AddToRoleAsync(adminUser, administrator);
+
+            SchoolModelUser regularUser = new()
+            {
+                UserName = "user",
+                Email = "user@email.com",
+                EmailConfirmed = true,
+                LockoutEnabled = false,
+                SecurityStamp = Guid.NewGuid().ToString()
+            };
+
+            await userManager.CreateAsync(regularUser, configuration["DefaultPasswords:user"]!);
+            await userManager.AddToRoleAsync(regularUser, registeredUser);
+
+            return Ok();
         }
     }
 }
