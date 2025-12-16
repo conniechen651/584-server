@@ -17,7 +17,6 @@ namespace _584_server.Controllers
     {
 
         // GET: api/Districts
-        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<District>>> GetDistricts()
         {
@@ -112,7 +111,7 @@ namespace _584_server.Controllers
 
         // POST: api/Districts
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [Authorize]
+        [Authorize(Roles = "administrator")]
         [HttpPost]
         public async Task<ActionResult<District>> PostDistrict(District district)
         {

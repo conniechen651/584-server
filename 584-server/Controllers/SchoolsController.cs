@@ -23,6 +23,7 @@ namespace _584_server.Controllers
         }
 
         // GET: api/Schools
+        [Authorize(Roles = "registeredUser, administrator")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<School>>> GetSchools()
         {
@@ -76,7 +77,7 @@ namespace _584_server.Controllers
 
         // POST: api/Schools
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [Authorize]
+        [Authorize(Roles = "administrator")]
         [HttpPost]
         public async Task<ActionResult<School>> PostSchool(SchoolScore request)
         {
